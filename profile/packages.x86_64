@@ -11,6 +11,5 @@ pv
 # qemu-guest-agent
 syslinux
 # virtualbox-guest-utils-nox
-
-# docker
+# Harbor Serve
 docker
