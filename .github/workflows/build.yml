@@ -41,7 +41,7 @@ jobs:
       - name: Update keyring and install archiso
         run: |
           pacman -Sy --needed --noconfirm archlinux-keyring
-          pacman -Syu --needed --noconfirm archiso
+          pacman -Syu --needed --noconfirm archiso grub
 
       - name: Build ISO
         run: mkarchiso -v -m iso -o output/ -w tmp/ profile/
