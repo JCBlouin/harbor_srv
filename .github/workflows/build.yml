@@ -14,8 +14,24 @@ on:
       - '.github/workflows/**'
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux/archlinux:latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: |
+          pacman -Sy --needed --noconfirm archlinux-keyring
+          pacman --noconfirm -Syu --needed shellcheck
+
+      - name: Shellcheck
+        run: shellcheck profile/profiledef.sh
+
   build:
     runs-on: ubuntu-latest
+    needs: check
     container:
       image: archlinux/archlinux:latest
       options: --privileged
