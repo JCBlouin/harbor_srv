@@ -1,11 +1,12 @@
 [Match]
 Type=ether
-# Exclude virtual Ethernet interfaces
 Kind=!*
 
 [Link]
 RequiredForOnline=routable
 
 [Network]
-DHCP=yes
-MulticastDNS=yes
+Address=192.168.1.5/24
+Gateway=192.168.1.1
+DNS=1.1.1.1
+DNS=8.8.8.8
