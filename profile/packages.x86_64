@@ -1,11 +1,13 @@
 # base
 base
 linux
+linux-firmware
 mkinitcpio
-mkinitcpio-archiso
 openssh
 pv
-syslinux
+
+# boot
+efibootmgr
 
 # Harbor Serve
 docker
