@@ -61,11 +61,21 @@ Drop-in for `docker.service` that adds a hard dependency on the Synology NFS mou
 
 ### [`etc/mkinitcpio.conf.d/archiso.conf`](etc/mkinitcpio.conf.d/archiso.conf)
 
-Custom mkinitcpio hooks config. Specifies the minimal hook set needed to boot from an ext4 image on bare hardware: `base udev autodetect modconf block filesystems fsck`. This file is referenced by `linux.preset` below.
+Custom mkinitcpio hooks config. Specifies the minimal hook set needed to boot from an ext4 image on bare hardware: `base udev modconf block filesystems fsck no_emergency_shell`. `autodetect` is intentionally omitted — it scans `/sys` at build time, which in a CI container reflects the runner VM hardware, not the target ThinkPad. This file is referenced by `linux.preset` below.
 
 ### [`etc/mkinitcpio.d/linux.preset`](etc/mkinitcpio.d/linux.preset)
 
 mkinitcpio preset for the `linux` package. Defines a single `default` preset that points at our custom config above. Replaces the stock preset so that running `mkinitcpio -P` (in `build-image.sh`) uses our hooks rather than the package defaults.
+
+### [`usr/lib/initcpio/install/no_emergency_shell`](usr/lib/initcpio/install/no_emergency_shell)
+
+Build-time mkinitcpio hook. Bundles `blkid`, `sed`, and the runtime hook script into the initramfs image.
+
+### [`usr/lib/initcpio/hooks/no_emergency_shell`](usr/lib/initcpio/hooks/no_emergency_shell)
+
+Runtime mkinitcpio hook. Redefines `launch_interactive_shell` so that any initramfs-stage boot failure (missing init, failed root mount, etc.) triggers automatic slot failover instead of dropping to an interactive emergency shell — which would stall a headless server indefinitely.
+
+On failure: reads the failing slot's PARTUUID from `/proc/cmdline`, loads `/new_root/etc/harbor/partitions.conf`, mounts the ESP, removes the failing slot's boot entries, flips `loader.conf` to the other slot, and reboots. Falls back to a blind sysrq reboot (consuming one try-counter cycle) if the partition config or ESP are unreachable.
 
 ---
 
