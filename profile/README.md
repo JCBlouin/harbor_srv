@@ -1,6 +1,17 @@
+[← harbor_srv](../README.md)
+
 # profile/
 
 The OS profile — everything baked into the root filesystem image.
+
+## Table of Contents
+
+- [Files](#files)
+  - [packages.x86_64](#packagesx86_64)
+  - [pacman.conf](#pacmanconf)
+  - [profiledef.sh](#profiledefsh)
+- [airootfs/](#airootfs)
+- [Making changes](#making-changes)
 
 `scripts/build-image.sh` reads this directory to produce `harbor_srv-root.img.zst`.
 

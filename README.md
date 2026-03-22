@@ -1,8 +1,23 @@
 # harbor_srv
 
+[![Build](https://github.com/JCBlouin/harbor_srv/actions/workflows/build.yml/badge.svg)](https://github.com/JCBlouin/harbor_srv/actions/workflows/build.yml)
+
 A bare-minimum, stateless Arch Linux server for hosting Docker containers on a Lenovo ThinkPad connected to a Synology NAS.
 
 The core idea: the OS is a disposable, reproducible artifact. When something goes wrong, you reflash — you don't troubleshoot. Upgrades are handled the same way as deployments.
+
+## Table of Contents
+
+- [Architecture](#architecture)
+  - [Zero-drift guarantee](#zero-drift-guarantee)
+  - [A/B boot with automatic fallback](#ab-boot-with-automatic-fallback)
+- [Hardware](#hardware)
+- [Repository layout](#repository-layout)
+- [Getting started](#getting-started)
+  - [First-time setup](#first-time-setup)
+  - [Deploying an update](#deploying-an-update)
+  - [SSH access](#ssh-access)
+- [Making changes](#making-changes)
 
 ## Architecture
 
@@ -105,5 +120,7 @@ ssh -i ~/.ssh/harbor_srv root@192.168.1.5
 All OS configuration lives in `profile/`. To add a package, add it to `profile/packages.x86_64`. To add or change a config file, add it under `profile/airootfs/` at the path it should appear on the root filesystem.
 
 Push to a branch and open a PR. CI will build and upload the artifact. Merge and deploy.
+
+Commit messages follow [Conventional Commits](https://www.conventionalcommits.org) (`feat:`, `fix:`, `docs:`, `chore:`, etc.).
 
 See [`profile/README.md`](profile/README.md) and [`scripts/README.md`](scripts/README.md) for details.

@@ -1,8 +1,19 @@
+[← profile](../README.md)
+
 # airootfs/
 
-Config overlay copied verbatim into the root filesystem during `build-image.sh`. Every file here appears at the same path in the installed system. Permissions are set separately via `profiledef.sh` — see `profile/README.md`.
+Config overlay copied verbatim into the root filesystem during `build-image.sh`. Every file here appears at the same path in the installed system. Permissions are set separately via `profiledef.sh` — see [`profile/README.md`](../README.md).
 
-This README is stripped from the image at build time.
+> This README is stripped from the image at build time.
+
+## Table of Contents
+
+- [SSH](#ssh)
+- [Networking](#networking)
+- [NFS mount](#nfs-mount)
+- [Initramfs](#initramfs)
+- [Locale](#locale)
+- [Credentials](#credentials)
 
 ---
 
