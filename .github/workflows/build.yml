@@ -6,11 +6,13 @@ on:
     branches: [test]
     paths:
       - 'profile/**'
+      - 'scripts/**'
       - '.github/workflows/**'
   pull_request:
     branches: [main]
     paths:
       - 'profile/**'
+      - 'scripts/**'
       - '.github/workflows/**'
 
 jobs:
@@ -27,7 +29,11 @@ jobs:
           pacman --noconfirm -Syu --needed shellcheck
 
       - name: Shellcheck
-        run: shellcheck profile/profiledef.sh
+        run: |
+          shellcheck profile/profiledef.sh
+          shellcheck scripts/build-image.sh
+          shellcheck scripts/install.sh
+          shellcheck scripts/deploy.sh
 
   build:
     runs-on: ubuntu-latest
@@ -38,17 +44,17 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Update keyring and install archiso
+      - name: Install dependencies
         run: |
           pacman -Sy --needed --noconfirm archlinux-keyring
-          pacman -Syu --needed --noconfirm archiso grub
+          pacman -Syu --needed --noconfirm arch-install-scripts e2fsprogs dosfstools zstd
 
-      - name: Build ISO
-        run: mkarchiso -v -m iso -o output/ -w tmp/ profile/
+      - name: Build root image
+        run: ./scripts/build-image.sh profile/ output/
 
-      - name: Upload ISO artifact
+      - name: Upload root image artifact
         uses: actions/upload-artifact@v5
         with:
-          name: harbor_srv-iso
+          name: harbor_srv-root
           path: output/
           retention-days: 30
