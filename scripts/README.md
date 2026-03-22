@@ -1,6 +1,14 @@
+[← harbor_srv](../README.md)
+
 # scripts/
 
 Operational scripts for building, installing, and deploying harbor_srv.
+
+## Table of Contents
+
+- [build-image.sh](#build-imagesh)
+- [install.sh](#installsh)
+- [deploy.sh](#deploysh)
 
 ## `build-image.sh`
 
