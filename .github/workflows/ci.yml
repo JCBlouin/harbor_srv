@@ -1,5 +1,5 @@
 ---
-name: Build
+name: CI
 
 # Snapshot date and Docker image digest are pinned together.
 # To upgrade the full stack, update both values here and open a PR.
@@ -9,19 +9,15 @@ env:
 
 on:
   push:
-    branches: [test, main]
+    branches: [test]
     paths:
       - 'profile/**'
       - 'scripts/**'
-      - '.github/workflows/**'
-      - '!**/README.md'
   pull_request:
     branches: [test]
     paths:
       - 'profile/**'
       - 'scripts/**'
-      - '.github/workflows/**'
-      - '!**/README.md'
 
 jobs:
   select-runner:
@@ -89,19 +85,3 @@ jobs:
           name: harbor_srv-root
           path: output/
           retention-days: 30
-
-  deploy:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: build
-    runs-on: [self-hosted, harbor-srv]
-    steps:
-      - name: Download root image
-        uses: actions/download-artifact@v6
-        with:
-          name: harbor_srv-root
-          path: /tmp/harbor-deploy/
-
-      - name: Deploy
-        run: |
-          mv /tmp/harbor-deploy/harbor_srv-root.img.zst /tmp/harbor_srv-root.img.zst
-          sudo /usr/local/sbin/harbor-deploy
