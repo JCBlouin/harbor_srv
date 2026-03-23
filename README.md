@@ -1,6 +1,6 @@
 # harbor_srv
 
-[![CI](https://github.com/JCBlouin/harbor_srv/actions/workflows/ci.yml/badge.svg?branch=test)](https://github.com/JCBlouin/harbor_srv/actions/workflows/ci.yml)
+[![CI](https://github.com/JCBlouin/harbor_srv/actions/workflows/ci.yml/badge.svg?branch=staging)](https://github.com/JCBlouin/harbor_srv/actions/workflows/ci.yml)
 
 A bare-minimum, stateless Arch Linux server for hosting Docker containers on a Lenovo ThinkPad connected to a Synology NAS.
 
@@ -79,8 +79,8 @@ scripts/
   deploy.sh               Each release: writes image to inactive slot, reboots
 
 .github/workflows/
-  ci.yml                  Runs on push/PR to test: shellcheck + build image + upload artifact
-  deploy.yml              Runs on push to main (or manually): deploys last successful test artifact
+  ci.yml                  Runs on push/PR to staging: shellcheck + build image + upload artifact
+  deploy.yml              Runs on push to main (or manually): deploys last successful staging artifact
 ```
 
 ## Getting started
@@ -100,7 +100,12 @@ bash install.sh /dev/nvme0n1 harbor_srv-root.img.zst
 
 ### Deploying an update
 
-Deployments are automatic — merging `test` into `main` triggers `deploy.yml`, which downloads the last successful CI artifact from `test` and runs `harbor-deploy` on the server. No manual steps required.
+Deployments are automatic — promoting `staging` to `main` triggers `deploy.yml`, which downloads the last successful CI artifact from `staging` and runs `harbor-deploy` on the server. No manual steps required.
+
+To promote staging to production:
+```bash
+git push origin staging:main
+```
 
 To trigger a deploy manually (e.g. after a workflow-only change that didn't fire the path filter):
 
@@ -122,24 +127,37 @@ See [`profile/README.md`](profile/README.md) and [`scripts/README.md`](scripts/R
 
 ### Branch workflow
 
-```
-main        stable, production — only receives merges from test
- └── test   staging — only receives merges from feature branches
-      └── your-branch   all work starts here
+```mermaid
+flowchart LR
+    F["feat/* branch"]
+    CI["CI\nshellcheck + build"]
+    STG["staging"]
+    MAIN["main\n(production)"]
+    SRV["server\n(harbor-srv)"]
+
+    F -->|"open PR"| CI
+    CI -->|fail| F
+    CI -->|"pass → merge"| STG
+    STG -->|"git push origin staging:main"| MAIN
+    MAIN -->|"deploy.yml\ndownload artifact"| SRV
 ```
 
-1. **Branch from `test`** — always, not from `main`:
+**Day-to-day:**
+
+1. **Branch from `staging`:**
    ```bash
-   git checkout test && git pull
+   git checkout staging && git pull
    git checkout -b feat/your-change
    ```
-2. **Open a PR targeting `test`** — CI runs `check` + `build`, producing an artifact.
-3. **Rebase and merge** into `test` — keeps `test` linear (no merge commits from feature branches).
-4. **Test manually** on the server (trigger a deploy via Actions if needed).
-5. **Open a PR from `test` to `main`** — no rebuild, just deploy.
-6. **Merge commit** (not squash, not rebase) — preserves the full commit history from `test` without rewriting SHAs. `deploy.yml` then downloads the already-built artifact from step 2 and deploys it.
+2. **Open a PR targeting `staging`** — CI runs `check` + `build` and uploads an artifact.
+3. **Rebase and merge** into `staging` (no merge commits).
+4. **Promote when ready:**
+   ```bash
+   git push origin staging:main
+   ```
+   `deploy.yml` picks up the artifact already built by CI and flashes the server. No rebuild.
 
-> **Why branch from `test` and not `main`?** `test` is ahead of `main` by definition — it contains changes that have been built but not yet promoted. Branching from `main` means your feature branch is missing those changes, which causes conflicts when rebasing onto `test`.
+> `staging` and `main` are always at the same commit after a promotion — divergence is structurally impossible with fast-forward-only merges.
 
 ## Updating the stack
 
