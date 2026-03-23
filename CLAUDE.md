@@ -20,6 +20,12 @@ Never create merge commits. Always rebase feature branches onto `staging` before
 
 No deploy ever rebuilds the image — it always uses the artifact already produced by CI on `staging`.
 
+## Server access
+
+```bash
+ssh -i ~/.ssh/harbor_srv root@192.168.1.5
+```
+
 ## Runner / sudo
 
 The GitHub Actions runner (`harbor-srv`) must never have root or sudo access directly. Privileged operations (e.g. `harbor-deploy`) are invoked via `sudo` to specific whitelisted scripts only — never `sudo bash` or unrestricted sudo.
