@@ -1,0 +1,41 @@
+---
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'profile/**'
+      - 'scripts/**'
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, harbor-srv]
+    steps:
+      - name: Find last successful CI run on test
+        id: find-run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RUN_ID=$(gh api \
+            "repos/${{ github.repository }}/actions/workflows/ci.yml/runs?branch=test&status=success&per_page=1" \
+            --jq '.workflow_runs[0].id')
+          if [ -z "$RUN_ID" ] || [ "$RUN_ID" = "null" ]; then
+            echo "ERROR: no successful CI run found on test branch — nothing to deploy" >&2
+            exit 1
+          fi
+          echo "run_id=${RUN_ID}" >> "$GITHUB_OUTPUT"
+
+      - name: Download root image artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run download "${{ steps.find-run.outputs.run_id }}" \
+            --repo "${{ github.repository }}" \
+            -n harbor_srv-root \
+            -D /tmp/harbor-deploy/
+
+      - name: Deploy
+        run: |
+          mv /tmp/harbor-deploy/harbor_srv-root.img.zst /tmp/harbor_srv-root.img.zst
+          sudo /usr/local/sbin/harbor-deploy
