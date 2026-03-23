@@ -2,35 +2,53 @@
 
 # .github/workflows/
 
-CI pipeline for harbor_srv. Uses a three-branch model:
+CI/CD pipeline for harbor_srv. Uses a two-branch model:
 
-- **Dev branches** — local development, PR'd into `test`
-- **`test`** — integration branch; PRs and pushes trigger CI (shellcheck + image build)
-- **`main`** — stable, known-good; manual merge from `test` after verifying on the server. No CI triggers.
+- **Feature branches** (`feat/`, `fix/`, `docs/`, `chore/`) — local development, PR'd into `staging`
+- **`staging`** — integration branch; PRs and pushes trigger CI (shellcheck + image build)
+- **`main`** — production; fast-forward promoted from `staging` when ready to deploy
 
 README-only changes do not trigger a build.
 
+## Branch workflow
+
+```
+feat/my-thing  →  PR to staging  →  CI runs  →  merge (rebase)
+                                                      ↓
+                             git push origin staging:main   ← promote when ready
+                                                      ↓
+                                               deploy.yml fires
+```
+
+Feature branch rule: always `git rebase origin/staging` before opening a PR. Never merge.
+
+Promote command (run locally, requires CI green on staging):
+```bash
+git push origin staging:main
+```
+
 ## Table of Contents
 
-- [build.yml](#buildyml)
+- [ci.yml](#ciyml)
   - [Triggers](#triggers)
   - [check job](#check-job)
   - [build job](#build-job)
   - [Artifact](#artifact)
+- [deploy.yml](#deployyml)
 
 ---
 
-## [build.yml](build.yml)
+## [ci.yml](ci.yml)
 
 Two-job pipeline: `check` must pass before `build` runs.
 
 ### Triggers
 
 Runs on:
-- Push to the `test` branch
-- Pull requests targeting `test`
+- Push to the `staging` branch
+- Pull requests targeting `staging`
 
-Only fires when files under `profile/**`, `scripts/**`, or `.github/workflows/**` change. Changes to `README.md` files are explicitly excluded.
+Only fires when files under `profile/**` or `scripts/**` change.
 
 ### check job
 
@@ -63,3 +81,9 @@ Download with:
 ```bash
 gh run download <run-id> -n harbor_srv-root -D /tmp/deploy
 ```
+
+---
+
+## [deploy.yml](deploy.yml)
+
+Triggers on push to `main` (and `workflow_dispatch`). Fetches the artifact from the last successful CI run on `staging` and flashes it to the server via the self-hosted runner.

@@ -9,12 +9,12 @@ env:
 
 on:
   push:
-    branches: [test]
+    branches: [staging]
     paths:
       - 'profile/**'
       - 'scripts/**'
   pull_request:
-    branches: [test]
+    branches: [staging]
     paths:
       - 'profile/**'
       - 'scripts/**'
