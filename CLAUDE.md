@@ -65,6 +65,13 @@ Projects Classic was fully sunset on August 23, 2024. **Never use it.** Always u
 - CLI: `gh project` (requires gh v2.82.1+)
 - API: GraphQL only — the classic REST projects API was removed April 1, 2025
 
+## After opening a PR
+
+After pushing a branch and creating or updating a PR:
+1. Check for merge conflicts: `gh api repos/{owner}/{repo}/pulls/{N} --jq '.mergeable_state'` — a value of `dirty` means conflicts exist.
+2. Check CI status: `gh pr checks {N}` — look for any failing checks.
+3. If conflicts or failures exist, pause and report a plan to resolve them before continuing. Only proceed autonomously if the fix is trivial (e.g. a single-file rebase conflict with an obvious resolution).
+
 ## Never do
 
 - **NEVER merge or approve any PR** — into `staging`, `main`, or any branch — without the user's explicit instruction to do so. This applies even when CI is green and the branch is ready.
