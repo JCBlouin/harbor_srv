@@ -49,12 +49,14 @@ jobs:
           retention-days: 30
 
       - name: Job summary
+        env:
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
           cat >> "$GITHUB_STEP_SUMMARY" <<EOF
           | Field | Value |
           |---|---|
           | Commit | \`${{ github.sha }}\` |
-          | Message | ${{ github.event.head_commit.message }} |
+          | Message | ${COMMIT_MSG} |
           | Branch | \`${{ github.ref_name }}\` |
           | Arch snapshot | \`${{ env.ARCH_SNAPSHOT }}\` |
           | Built at | \`$(date -u)\` |
