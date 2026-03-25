@@ -8,3 +8,7 @@ At the start of every session, run the following commands and read their output 
 gh api repos/blouin-labs/claude/contents/CLAUDE.md --jq '.content' | base64 -d
 gh api repos/blouin-labs/claude/contents/harbor_srv/CLAUDE.md --jq '.content' | base64 -d
 ```
+
+## Issues
+
+Issues for this repo live in **[blouin-labs/issues](https://github.com/blouin-labs/issues)**. Apply the `harbor_srv` label to issues related to this repo. Repo-specific labels also include `golden image`.
