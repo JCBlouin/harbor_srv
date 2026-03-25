@@ -1,3 +1,2 @@
-profile/
-scripts/
+profile/airootfs/etc/systemd/
 styles/
