@@ -83,6 +83,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Remove dangling symlinks
+        run: find . -xtype l -delete
+
       - uses: vale-cli/vale-action@v2.1.1
         with:
           files: "."
