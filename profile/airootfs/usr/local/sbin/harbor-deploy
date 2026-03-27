@@ -96,8 +96,14 @@ if [ -n "${KRB5_SECRETS_B64:-}" ]; then
         --no-same-owner --owner=0 --group=0 \
         var/lib/krb5kdc/ etc/krb5.keytab
     chmod 700 "${MOUNT_DIR}/var/lib/krb5kdc"
-    chmod 600 "${MOUNT_DIR}/var/lib/krb5kdc"/*
+    # Use find instead of a glob to avoid following symlinks — a crafted tarball
+    # could include a symlink whose target would otherwise be chmod'd on the
+    # running system.
+    find "${MOUNT_DIR}/var/lib/krb5kdc" -maxdepth 1 ! -type l -exec chmod 600 {} +
     chmod 600 "${MOUNT_DIR}/etc/krb5.keytab"
+    # Clear the secret from the environment — it has been consumed; child
+    # processes forked later in this script should not inherit it.
+    unset KRB5_SECRETS_B64
     echo ":: Kerberos secrets injected."
 else
     echo "WARNING: KRB5_SECRETS_B64 not set — Kerberos will not be functional" >&2
