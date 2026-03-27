@@ -77,7 +77,7 @@ KDC daemon configuration. The KDC listens on port 88 (UDP and TCP). Only AES-256
 
 ### [`var/lib/krb5kdc/kadm5.acl`](var/lib/krb5kdc/kadm5.acl)
 
-kadmin access control list. Grants full administrative privileges (`*`) to any principal of the form `*/admin@JCB.LOCAL`. Used only for local keytab management—`kadmind` isn't enabled in production.
+kadmin access control list. Grants full administrative privileges (`*`) to any principal of the form `*/admin@JCB.LOCAL`. Used only for local keytab management; `kadmind` isn't enabled in production.
 
 ### [`etc/systemd/system/rpc-gssd.service.d/krb5-ordering.conf`](etc/systemd/system/rpc-gssd.service.d/krb5-ordering.conf)
 
