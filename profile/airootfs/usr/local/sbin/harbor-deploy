@@ -89,9 +89,14 @@ cp "$CONF" "${MOUNT_DIR}/etc/harbor/partitions.conf"
 if [ -n "${KRB5_SECRETS_B64:-}" ]; then
     echo ":: Injecting Kerberos secrets..."
     mkdir -p "${MOUNT_DIR}/var/lib/krb5kdc"
-    printf '%s' "$KRB5_SECRETS_B64" | base64 -d | tar -xz -C "$MOUNT_DIR" --no-same-owner --owner=0 --group=0
+    # Extract only the two expected paths (KDC database directory and server keytab).
+    # Explicit path arguments prevent a malformed or compromised tarball from
+    # writing files to arbitrary locations under $MOUNT_DIR.
+    printf '%s' "$KRB5_SECRETS_B64" | base64 -d | tar -xz -C "$MOUNT_DIR" \
+        --no-same-owner --owner=0 --group=0 \
+        var/lib/krb5kdc/ etc/krb5.keytab
     chmod 700 "${MOUNT_DIR}/var/lib/krb5kdc"
-    chmod 600 "${MOUNT_DIR}/var/lib/krb5kdc"/* 2>/dev/null || true
+    chmod 600 "${MOUNT_DIR}/var/lib/krb5kdc"/*
     chmod 600 "${MOUNT_DIR}/etc/krb5.keytab"
     echo ":: Kerberos secrets injected."
 else

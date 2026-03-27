@@ -124,8 +124,11 @@ jobs:
     steps:
       - name: Flash server
         env:
+          # KRB5_SECRETS_B64 is picked up by sudo via env_keep in sudoers.d/runner.
+          # Do not use SETENV: or pass the variable inline (sudo VAR=val) — that
+          # form requires SETENV: which broadens the attack surface to all env vars.
           KRB5_SECRETS_B64: ${{ secrets.KRB5_SECRETS_B64 }}
-        run: sudo KRB5_SECRETS_B64="$KRB5_SECRETS_B64" /usr/local/sbin/harbor-deploy
+        run: sudo /usr/local/sbin/harbor-deploy
 
   verify:
     needs: [flash]
